@@ -1,0 +1,43 @@
+{
+  "name": "es6-eventemitter",
+  "description": "An Event Emitter alternative written in ES2015",
+  "keywords": [
+    "events",
+    "event",
+    "emitter",
+    "es6"
+  ],
+  "version": "0.0.1",
+  "homepage": "",
+  "author": "Eser Ozvataf <eser@ozvataf.com>",
+  "contributors": [
+    {
+      "name": "Eser Ozvataf",
+      "email": "eser@ozvataf.com",
+      "url": "http://eser.ozvataf.com/"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eserozvataf/es6-eventemitter.git"
+  },
+  "bugs": {
+    "url": "https://github.com/eserozvataf/es6-eventemitter/issues",
+    "email": "eser@ozvataf.com"
+  },
+  "license": "Apache-2.0",
+  "main": "./lib/index.js",
+  "engines": {
+    "node": ">=4.2.0"
+  },
+  "scripts": {},
+  "directories": {
+    "lib": "./lib"
+  },
+  "files": [
+    "lib"
+  ],
+  "bin": {},
+  "dependencies": {},
+  "devDependencies": {}
+}
