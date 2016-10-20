@@ -1,3 +1,1 @@
-import { EventEmitter } from './EventEmitter.js';
-
-module.exports = EventEmitter;
+module.exports = require('./EventEmitter.js');

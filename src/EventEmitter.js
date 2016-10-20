@@ -1,4 +1,4 @@
-export class EventEmitter {
+class EventEmitter {
     constructor() {
         this.events = {};
     }
@@ -18,59 +18,71 @@ export class EventEmitter {
             return [];
         }
 
-        return this.events[event].map((item) => item.action);
+        return this.events[event].on.map((item) => item.action)
+            .concat(this.events[event].once.map((item) => item.action));
     }
 
     emit(event, ...args) {
-        if (!this.events.hasOwnProperty(event)) {
-            return false;
-        }
+        // if (!this.events.hasOwnProperty(event)) {
+        //     return false;
+        // }
 
-        return this.events[event].map((item) => {
-            if (item.once) {
-                delete this.events[event];
-            }
+        const eventListeners = this.events[event],
+            _fire = (item) => {
+                item.action.call(item.context, ...args);
+            };
 
-            return item.action.call(item.context, ...args);
-        });
+        eventListeners.on.forEach(_fire);
+
+        eventListeners.once.forEach(_fire);
+        eventListeners.once = [];
     }
 
     on(event, action, context) {
         if (!(event in this.events)) {
-            this.events[event] = [];
+            this.events[event] = {
+                on: [],
+                once: []
+            };
         }
 
-        this.events[event].push({
-            action: action,
-            context: context,
-            once: false
-        });
+        this.events[event].on = [
+            ...this.events[event].on,
+            {
+                action: action,
+                context: context
+            }
+        ];
 
         return this;
     }
 
     once(event, action, context) {
         if (!(event in this.events)) {
-            this.events[event] = [];
+            this.events[event] = {
+                on: [],
+                once: []
+            };
         }
 
-        this.events[event].push({
-            action: action,
-            context: context,
-            once: true
-        });
+        this.events[event].once = [
+            ...this.events[event].once,
+            {
+                action: action,
+                context: context
+            }
+        ];
 
         return this;
     }
 
     off(event, action) {
-        if (!(event in this.events)) {
-            return this;
-        }
+        // if (!(event in this.events)) {
+        //     return this;
+        // }
 
-        const index = this.events[event].indexOf(action);
-
-        delete this.events[event][index];
+        this.events[event].on = this.events[event].on.filter((item) => item.action !== action);
+        this.events[event].once = this.events[event].once.filter((item) => item.action !== action);
 
         return this;
     }
@@ -92,4 +104,4 @@ export class EventEmitter {
     }
 }
 
-export default EventEmitter;
+module.exports = EventEmitter;
