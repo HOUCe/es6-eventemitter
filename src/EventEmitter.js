@@ -23,9 +23,9 @@ export class EventEmitter {
     }
 
     emit(event, ...args) {
-        // if (!this.events.hasOwnProperty(event)) {
-        //     return false;
-        // }
+        if (!this.events.hasOwnProperty(event)) {
+            return false;
+        }
 
         const eventListeners = this.events[event],
             _fire = (item) => {
@@ -36,6 +36,8 @@ export class EventEmitter {
 
         eventListeners.once.forEach(_fire);
         eventListeners.once = [];
+
+        return true;
     }
 
     on(event, action, context) {
