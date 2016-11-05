@@ -31,7 +31,7 @@ let config = new sey.config({
                 addheader: true,
                 eolfix: true,
                 lint: true,
-                optimize: true,
+                // optimize: true,
                 transpile: true
             },
             {
