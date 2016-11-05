@@ -56,8 +56,34 @@ export class EventEmitter {
             listenerArgs = [ ...args ],
             listenerCallDelegate = (item) => item.listener.apply(item.context, listenerArgs);
 
+        this.events = Object.assign({}, this.events, {
+            [eventName]: {
+                on: eventListeners.on,
+                once: []
+            }
+        });
+
         eventListeners.on.forEach(listenerCallDelegate);
         eventListeners.once.forEach(listenerCallDelegate);
+
+        return true;
+    }
+
+    async emitAsync(eventName, ...args) {
+        if (!this.events.hasOwnProperty(eventName)) {
+            return false;
+        }
+
+        const eventListeners = this.events[eventName],
+            listenerArgs = [ ...args ],
+            listenerCallDelegate = (item) => new Promise((resolve, reject) => {
+                try {
+                    resolve(item.listener.apply(item.context, listenerArgs));
+                }
+                catch (err) {
+                    reject(err);
+                }
+            });
 
         this.events = Object.assign({}, this.events, {
             [eventName]: {
@@ -65,6 +91,11 @@ export class EventEmitter {
                 once: []
             }
         });
+
+        const result = eventListeners.on.map(listenerCallDelegate)
+            .concat(eventListeners.once.map(listenerCallDelegate));
+
+        await Promise.all(result);
 
         return true;
     }
