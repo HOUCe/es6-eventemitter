@@ -4,6 +4,9 @@ export class EventEmitter {
     constructor() {
         this.events = {};
         this.maxListeners = this.constructor.defaultMaxListeners;
+
+        this.paused = false;
+        this.emitQueue = [];
     }
 
     getMaxListeners() {
@@ -56,6 +59,15 @@ export class EventEmitter {
             return false;
         }
 
+        if (this.paused) {
+            this.emitQueue = immunity.appendToArray(
+                this.emitQueue,
+                { async: false, eventName: eventName, params: args }
+            );
+
+            return true;
+        }
+
         const eventListeners = this.events[eventName],
             listenerArgs = [ ...args ],
             listenerCallDelegate = (item) => item.listener.apply(item.context, listenerArgs);
@@ -76,6 +88,15 @@ export class EventEmitter {
     async emitAsync(eventName, ...args) {
         if (!this.events.hasOwnProperty(eventName)) {
             return false;
+        }
+
+        if (this.paused) {
+            this.emitQueue = immunity.appendToArray(
+                this.emitQueue,
+                { async: true, eventName: eventName, params: args }
+            );
+
+            return true;
         }
 
         const eventListeners = this.events[eventName],
@@ -221,6 +242,29 @@ export class EventEmitter {
         }
 
         this.events = immunity.removeKeyFromObject(this.events, eventName);
+    }
+
+    pause() {
+        this.paused = true;
+    }
+
+    resume() {
+        if (!this.paused) {
+            return;
+        }
+
+        this.paused = false;
+
+        for (const item of this.emitQueue) {
+            if (item.async) {
+                this.emitAsync(item.eventName, ...item.params);
+            }
+            else {
+                this.emit(item.eventName, ...item.params);
+            }
+        }
+
+        this.emitQueue = [];
     }
 }
 
