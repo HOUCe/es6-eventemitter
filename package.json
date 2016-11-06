@@ -7,7 +7,7 @@
     "emitter",
     "es6"
   ],
-  "version": "0.0.5",
+  "version": "0.0.6",
   "homepage": "",
   "author": "Eser Ozvataf <eser@ozvataf.com>",
   "contributors": [
@@ -38,6 +38,8 @@
     "lib"
   ],
   "bin": {},
-  "dependencies": {},
+  "dependencies": {
+    "immunity": "0.0.3"
+  },
   "devDependencies": {}
 }

@@ -1,3 +1,5 @@
+import immunity from 'immunity';
+
 export class EventEmitter {
     constructor() {
         this.events = {};
@@ -43,8 +45,10 @@ export class EventEmitter {
 
         const eventListeners = this.events[eventName];
 
-        return eventListeners.on.map((item) => item.listener)
-            .concat(eventListeners.once.map((item) => item.listener));
+        return immunity.mergeArrays(
+            eventListeners.on.map((item) => item.listener),
+            eventListeners.once.map((item) => item.listener)
+        );
     }
 
     emit(eventName, ...args) {
@@ -56,7 +60,7 @@ export class EventEmitter {
             listenerArgs = [ ...args ],
             listenerCallDelegate = (item) => item.listener.apply(item.context, listenerArgs);
 
-        this.events = Object.assign({}, this.events, {
+        this.events = immunity.appendToObject(this.events, {
             [eventName]: {
                 on: eventListeners.on,
                 once: []
@@ -85,15 +89,17 @@ export class EventEmitter {
                 }
             });
 
-        this.events = Object.assign({}, this.events, {
+        this.events = immunity.appendToObject(this.events, {
             [eventName]: {
                 on: eventListeners.on,
                 once: []
             }
         });
 
-        const result = eventListeners.on.map(listenerCallDelegate)
-            .concat(eventListeners.once.map(listenerCallDelegate));
+        const result = immunity.mergeArrays(
+            eventListeners.on.map(listenerCallDelegate),
+            eventListeners.once.map(listenerCallDelegate)
+        );
 
         await Promise.all(result);
 
@@ -104,36 +110,21 @@ export class EventEmitter {
         if (eventName in this.events) {
             const eventListeners = this.events[eventName];
 
-            let on;
-
-            if (prepend) {
-                on = [
-                    {
-                        listener: listener,
-                        context: context
-                    },
-                    ...eventListeners.on
-                ];
-            }
-            else {
-                on = [
-                    ...eventListeners.on,
-                    {
-                        listener: listener,
-                        context: context
-                    }
-                ];
-            }
-
-            this.events = Object.assign({}, this.events, {
+            this.events = immunity.appendToObject(this.events, {
                 [eventName]: {
-                    on: on,
+                    on: ((prepend) ? immunity.prependToArray : immunity.appendToArray)(
+                        eventListeners.on,
+                        {
+                            listener: listener,
+                            context: context
+                        }
+                    ),
                     once: eventListeners.once
                 }
             });
         }
         else {
-            this.events = Object.assign({}, this.events, {
+            this.events = immunity.appendToObject(this.events, {
                 [eventName]: {
                     on: [
                         {
@@ -155,36 +146,21 @@ export class EventEmitter {
         if (eventName in this.events) {
             const eventListeners = this.events[eventName];
 
-            let once;
-
-            if (prepend) {
-                once = [
-                    {
-                        listener: listener,
-                        context: context
-                    },
-                    ...eventListeners.once
-                ];
-            }
-            else {
-                once = [
-                    ...eventListeners.once,
-                    {
-                        listener: listener,
-                        context: context
-                    }
-                ];
-            }
-
-            this.events = Object.assign({}, this.events, {
+            this.events = immunity.appendToObject(this.events, {
                 [eventName]: {
                     on: eventListeners.on,
-                    once: once
+                    once: ((prepend) ? immunity.prependToArray : immunity.appendToArray)(
+                        eventListeners.once,
+                        {
+                            listener: listener,
+                            context: context
+                        }
+                    )
                 }
             });
         }
         else {
-            this.events = Object.assign({}, this.events, {
+            this.events = immunity.appendToObject(this.events, {
                 [eventName]: {
                     on: [],
                     once: [
@@ -208,7 +184,7 @@ export class EventEmitter {
         if (eventName in this.events) {
             const eventListeners = this.events[eventName];
 
-            this.events = Object.assign({}, this.events, {
+            this.events = immunity.appendToObject(this.events, {
                 [eventName]: {
                     on: eventListeners.on.filter(listenerRemoveFilter),
                     once: eventListeners.once.filter(listenerRemoveFilter)
@@ -244,17 +220,7 @@ export class EventEmitter {
             return;
         }
 
-        const newEvents = {};
-
-        for (const eventKey of Object.getOwnPropertyNames(this.events)) {
-            if (eventKey !== eventName) {
-                newEvents[eventKey] = this.events[eventKey];
-            }
-        }
-
-        // this.emit('removeListener', eventName, listener);
-
-        this.events = newEvents;
+        this.events = immunity.removeKeyFromObject(this.events, eventName);
     }
 }
 
