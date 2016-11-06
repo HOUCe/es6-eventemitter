@@ -69,8 +69,7 @@ export class EventEmitter {
         }
 
         const eventListeners = this.events[eventName],
-            listenerArgs = [ ...args ],
-            listenerCallDelegate = (item) => item.listener.apply(item.context, listenerArgs);
+            listenerCallDelegate = (item) => item.listener.apply(item.context, args);
 
         this.events = immunity.appendToObject(this.events, {
             [eventName]: {
@@ -100,10 +99,9 @@ export class EventEmitter {
         }
 
         const eventListeners = this.events[eventName],
-            listenerArgs = [ ...args ],
             listenerCallDelegate = (item) => new Promise((resolve, reject) => {
                 try {
-                    resolve(item.listener.apply(item.context, listenerArgs));
+                    resolve(item.listener.apply(item.context, args));
                 }
                 catch (err) {
                     reject(err);
